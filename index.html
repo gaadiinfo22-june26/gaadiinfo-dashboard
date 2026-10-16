@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GaadiInfo Support Hub</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── Layout: dashboard grid with sidebar stats, main ticket list, charts below ── */
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #e4e2dd;
+  --border-light: #eeece7;
+  --text-primary: #1a1917;
+  --text-secondary: #6b6960;
+  --text-muted: #9d9a8f;
+  --accent: #2a6fba;
+  --accent-light: #e8f0fa;
+  --accent-hover: #1e5a99;
+  --good: #1a8a5c;
+  --good-bg: #e6f5ee;
+  --warning: #c47a00;
+  --warning-bg: #fef3dc;
+  --serious: #d14343;
+  --serious-bg: #fde8e8;
+  --channel-email: #2a6fba;
+  --channel-whatsapp: #1a8a5c;
+  --channel-phone: #9d6ec1;
+  --channel-other: #9d9a8f;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --sparkline: #2a78d6;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141413;
+    --surface: #1e1e1c;
+    --surface-raised: #262624;
+    --border: #333330;
+    --border-light: #2a2a27;
+    --text-primary: #eeedea;
+    --text-secondary: #a8a69c;
+    --text-muted: #7a7870;
+    --accent: #4a9ae8;
+    --accent-light: #1c2d42;
+    --accent-hover: #6bb0f0;
+    --good: #2aad74;
+    --good-bg: #152e22;
+    --warning: #e09520;
+    --warning-bg: #2e2410;
+    --serious: #e86060;
+    --serious-bg: #2e1616;
+    --channel-email: #4a9ae8;
+    --channel-whatsapp: #2aad74;
+    --channel-phone: #b28ada;
+    --channel-other: #7a7870;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --sparkline: #4a9ae8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141413;
+  --surface: #1e1e1c;
+  --surface-raised: #262624;
+  --border: #333330;
+  --border-light: #2a2a27;
+  --text-primary: #eeedea;
+  --text-secondary: #a8a69c;
+  --text-muted: #7a7870;
+  --accent: #4a9ae8;
+  --accent-light: #1c2d42;
+  --accent-hover: #6bb0f0;
+  --good: #2aad74;
+  --good-bg: #152e22;
+  --warning: #e09520;
+  --warning-bg: #2e2410;
+  --serious: #e86060;
+  --serious-bg: #2e1616;
+  --channel-email: #4a9ae8;
+  --channel-whatsapp: #2aad74;
+  --channel-phone: #b28ada;
+  --channel-other: #7a7870;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --sparkline: #4a9ae8;
+  color-scheme: dark;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Setup overlay ── */
+.setup-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
+}
+.setup-card h1 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.setup-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+.setup-card label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.setup-card input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.setup-card input:focus { border-color: var(--accent); }
+.setup-card input::placeholder { color: var(--text-muted); }
+.setup-card button {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.setup-card button:hover { background: var(--accent-hover); }
+.setup-error {
+  color: var(--serious);
+  font-size: 13px;
+  margin-top: 12px;
+  display: none;
+}
+.setup-help {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.setup-help a { color: var(--accent); text-decoration: none; }
+
+/* ── Main layout ── */
+.app { display: none; }
+.app.active { display: block; }
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-left {
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar-logo {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 14px;
+  flex-shrink: 0;
+}
+.topbar h1 { font-size: 17px; font-weight: 700; }
+.topbar-right {
+  display: flex; align-items: center; gap: 8px;
+}
+.topbar-right .refresh-btn,
+.topbar-right .settings-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.topbar-right button:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.refresh-btn.loading .refresh-icon { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.last-updated {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.dashboard {
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── KPI tiles ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.kpi-tile {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.kpi-delta {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.kpi-delta.up { color: var(--serious); }
+.kpi-delta.down { color: var(--good); }
+.kpi-delta.neutral { color: var(--text-muted); }
+.kpi-sparkline {
+  height: 24px;
+  margin-top: 8px;
+}
+
+/* ── Section headers ── */
+.section-header {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-header .badge {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Charts row ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) {
+  .charts-row { grid-template-columns: 1fr; }
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 18px;
+}
+.chart-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+.chart-area {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Channel breakdown mini ── */
+.channel-bars { display: flex; flex-direction: column; gap: 8px; }
+.channel-row {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+}
+.channel-row .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.channel-row .name { flex: 1; color: var(--text-secondary); min-width: 0; }
+.channel-row .bar-wrap {
+  flex: 2;
+  height: 6px;
+  background: var(--border-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.channel-row .bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.channel-row .count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  width: 32px;
+  text-align: right;
+}
+
+/* ── Volume chart (bar) ── */
+.volume-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100px;
+  padding-top: 4px;
+}
+.vol-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.vol-bar {
+  width: 100%;
+  max-width: 28px;
+  border-radius: 3px 3px 0 0;
+  background: var(--series-1);
+  transition: height 0.4s ease;
+  position: relative;
+}
+.vol-bar:hover { opacity: 0.8; }
+.vol-bar .tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+.vol-bar:hover .tooltip { display: block; }
+.vol-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ── Agent table ── */
+.agent-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+.agent-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 13px;
+}
+.agent-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+}
+.agent-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  font-variant-numeric: tabular-nums;
+}
+.agent-table tr:last-child td { border-bottom: none; }
+.agent-name {
+  font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.agent-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.perf-bar {
+  height: 5px;
+  background: var(--border-light);
+  border-radius: 3px;
+  width: 80px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.perf-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* ── Ticket list ── */
+.ticket-controls {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+.filter-pill.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.search-input {
+  padding: 7px 12px 7px 32px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  min-width: 180px;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='6' cy='6' r='5' stroke='%239d9a8f' stroke-width='1.5'/%3E%3Cpath d='M10 10l3 3' stroke='%239d9a8f' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+  transition: border-color 0.15s;
+  flex: 1;
+  max-width: 240px;
+}
+.search-input:focus { border-color: var(--accent); }
+
+.ticket-list {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ticket-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 100px 100px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.1s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.ticket-item:last-child { border-bottom: none; }
+.ticket-item:hover { background: var(--bg); }
+@media (max-width: 600px) {
+  .ticket-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+.ticket-subject {
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ticket-contact {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+.status-pill.open { background: var(--warning-bg); color: var(--warning); }
+.status-pill.closed { background: var(--good-bg); color: var(--good); }
+.status-pill.on-hold { background: var(--serious-bg); color: var(--serious); }
+.status-pill.escalated { background: var(--serious-bg); color: var(--serious); }
+
+.channel-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.channel-tag .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ticket-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── Customer view ── */
+.customer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.customer-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.customer-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.customer-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.customer-stats {
+  display: flex; gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.customer-stats strong {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border-light);
+  margin-bottom: 16px;
+}
+.tab-btn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Loading ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--bg) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ── Responsive ── */
+@media (max-width: 500px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .topbar h1 { font-size: 15px; }
+  .setup-card { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Setup screen ── -->
+<div class="setup-overlay" id="setup">
+  <div class="setup-card">
+    <h1>GaadiInfo Support Hub</h1>
+    <p>Connect your Zoho Desk to see all tickets, analytics, and agent performance in one place.</p>
+    <label for="orgDomain">Zoho Desk Org Domain</label>
+    <input type="text" id="orgDomain" placeholder="vehicoretechnologiesprivatelimited" value="vehicoretechnologiesprivatelimited">
+    <label for="apiToken">Zoho Desk API Token (OAuth)</label>
+    <input type="password" id="apiToken" placeholder="1000.xxxx.xxxx">
+    <button id="connectBtn" onclick="handleConnect()">Connect to Zoho Desk</button>
+    <div class="setup-error" id="setupError"></div>
+    <div class="setup-help">
+      <strong>How to get your API token:</strong><br>
+      1. Go to <a href="https://api-console.zoho.in/" target="_blank" rel="noopener">Zoho API Console</a><br>
+      2. Create a Self Client and generate a token with <code>Desk.tickets.READ, Desk.contacts.READ, Desk.settings.READ</code> scopes<br>
+      3. Paste the access token above
+    </div>
+  </div>
+</div>
+
+<!-- ── Main app ── -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">GI</div>
+      <div>
+        <h1>Support Hub</h1>
+        <div class="last-updated" id="lastUpdated">Loading...</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="refreshData()">
+        <span class="refresh-icon">&#8635;</span> Refresh
+      </button>
+      <button class="settings-btn" onclick="showSetup()">&#9881;</button>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <!-- KPI row -->
+    <div class="kpi-row" id="kpiRow">
+      <div class="kpi-tile"><div class="kpi-label">Total Open</div><div class="kpi-value" id="kpiOpen">--</div><div class="kpi-delta neutral" id="kpiOpenDelta"></div></div>
+      <div class="kpi-tile"><div class="kpi-label">Unresponded</div><div class="kpi-value" id="kpiUnresponded">--</div><div class="kpi-delta neutral" id="kpiUnrespondedDelta"></div></div>
+      <div class="kpi-tile"><div class="kpi-label">Avg Response Time</div><div class="kpi-value" id="kpiAvgResponse">--</div><div class="kpi-delta neutral">hrs</div></div>
+      <div class="kpi-tile"><div class="kpi-label">Closed (7d)</div><div class="kpi-value" id="kpiClosed7d">--</div><div class="kpi-delta neutral" id="kpiClosedDelta"></div></div>
+      <div class="kpi-tile"><div class="kpi-label">Total Tickets</div><div class="kpi-value" id="kpiTotal">--</div></div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Channel Breakdown</h3>
+        <div class="chart-area" id="channelChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Daily Volume (Last 14 Days)</h3>
+        <div class="chart-area volume-chart" id="volumeChart"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tickets" onclick="switchTab('tickets')">Tickets</button>
+      <button class="tab-btn" data-tab="customers" onclick="switchTab('customers')">Customers</button>
+      <button class="tab-btn" data-tab="agents" onclick="switchTab('agents')">Agents</button>
+    </div>
+
+    <!-- Tickets tab -->
+    <div class="tab-content active" id="tab-tickets">
+      <div class="ticket-controls">
+        <button class="filter-pill active" data-status="all" onclick="filterTickets('all', this)">All</button>
+        <button class="filter-pill" data-status="Open" onclick="filterTickets('Open', this)">Open</button>
+        <button class="filter-pill" data-status="On Hold" onclick="filterTickets('On Hold', this)">On Hold</button>
+        <button class="filter-pill" data-status="Escalated" onclick="filterTickets('Escalated', this)">Escalated</button>
+        <button class="filter-pill" data-status="Closed" onclick="filterTickets('Closed', this)">Closed</button>
+        <input type="text" class="search-input" placeholder="Search tickets..." oninput="searchTickets(this.value)" id="searchInput">
+      </div>
+      <div class="ticket-list" id="ticketList">
+        <div class="empty-state">Loading tickets...</div>
+      </div>
+    </div>
+
+    <!-- Customers tab -->
+    <div class="tab-content" id="tab-customers">
+      <div class="customer-grid" id="customerGrid">
+        <div class="empty-state">Loading customers...</div>
+      </div>
+    </div>
+
+    <!-- Agents tab -->
+    <div class="tab-content" id="tab-agents">
+      <div class="agent-table-wrap">
+        <table class="agent-table" id="agentTable">
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Assigned</th>
+              <th>Resolved</th>
+              <th>Open</th>
+              <th>Avg Resolution</th>
+            </tr>
+          </thead>
+          <tbody id="agentTableBody">
+            <tr><td colspan="5" class="empty-state">Loading agents...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let allTickets = [];
+let currentFilter = 'all';
+let searchQuery = '';
+let config = {};
+
+// ── Init ──
+(function init() {
+  try {
+    const saved = localStorage.getItem('gi_desk_config');
+    if (saved) {
+      config = JSON.parse(saved);
+      if (config.orgDomain && config.apiToken) {
+        showApp();
+        refreshData();
+        return;
+      }
+    }
+  } catch(e) {}
+  document.getElementById('setup').style.display = 'flex';
+})();
+
+function handleConnect() {
+  const domain = document.getElementById('orgDomain').value.trim();
+  const token = document.getElementById('apiToken').value.trim();
+  if (!domain || !token) {
+    showError('Please fill in both fields.');
+    return;
+  }
+  config = { orgDomain: domain, apiToken: token };
+  try { localStorage.setItem('gi_desk_config', JSON.stringify(config)); } catch(e) {}
+  showApp();
+  refreshData();
+}
+
+function showApp() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+}
+
+function showSetup() {
+  document.getElementById('setup').style.display = 'flex';
+  document.getElementById('app').classList.remove('active');
+}
+
+function showError(msg) {
+  const el = document.getElementById('setupError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── Zoho Desk API (via CORS proxy or direct) ──
+// Zoho Desk API doesn't support browser CORS by default.
+// This dashboard uses a lightweight CORS proxy approach.
+// For GitHub Pages, deploy the included Cloudflare Worker (worker.js)
+// or use the GitHub Actions data-fetch approach.
+
+const PROXY_MODES = ['direct', 'corsproxy'];
+let proxyMode = 'direct';
+
+async function zohoDeskFetch(endpoint, params = {}) {
+  const base = `https://desk.zoho.in/api/v1`;
+  const url = new URL(`${base}${endpoint}`);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+  // Try direct first (works with proper CORS setup or local dev)
+  try {
+    const resp = await fetch(url.toString(), {
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${config.apiToken}`,
+        'orgId': config.orgId || ''
+      }
+    });
+    if (resp.ok) return await resp.json();
+    if (resp.status === 401) throw new Error('AUTH_EXPIRED');
+    throw new Error(`API ${resp.status}`);
+  } catch(e) {
+    if (e.message === 'AUTH_EXPIRED') throw e;
+    // If CORS fails, try loading from local data.json file
+    // (populated by GitHub Action)
+    throw e;
+  }
+}
+
+// ── Fallback: load from local data.json ──
+async function loadFromFile() {
+  try {
+    const resp = await fetch('./data/tickets.json');
+    if (resp.ok) return await resp.json();
+  } catch(e) {}
+  return null;
+}
+
+// ── Data fetching ──
+async function refreshData() {
+  const btn = document.querySelector('.refresh-btn');
+  btn.classList.add('loading');
+
+  try {
+    // Try API first, fall back to local JSON
+    let tickets = [];
+    let fromFile = false;
+
+    try {
+      // Fetch up to 100 tickets
+      const data = await zohoDeskFetch('/tickets', {
+        limit: 100,
+        sortBy: 'createdTime',
+        include: 'contacts,assignee'
+      });
+      tickets = data.data || [];
+    } catch(apiErr) {
+      // Try local data file
+      const fileData = await loadFromFile();
+      if (fileData && fileData.tickets) {
+        tickets = fileData.tickets;
+        fromFile = true;
+      } else {
+        // Use sample data for demo
+        tickets = generateSampleData();
+        fromFile = true;
+      }
+    }
+
+    allTickets = tickets;
+    renderDashboard(tickets, fromFile);
+
+  } catch(err) {
+    console.error('Refresh failed:', err);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+// ── Render everything ──
+function renderDashboard(tickets, fromFile) {
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    (fromFile ? 'From cached data · ' : 'Live · ') +
+    now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+  renderKPIs(tickets);
+  renderChannelChart(tickets);
+  renderVolumeChart(tickets);
+  renderTicketList(tickets);
+  renderCustomers(tickets);
+  renderAgents(tickets);
+}
+
+// ── KPIs ──
+function renderKPIs(tickets) {
+  const open = tickets.filter(t => t.status !== 'Closed');
+  const unresponded = tickets.filter(t => (t.threadCount === '1' || t.threadCount === 1) && t.status !== 'Closed');
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+  const closed7d = tickets.filter(t => t.status === 'Closed' && new Date(t.closedTime) > sevenDaysAgo);
+
+  // Avg response time (rough: time from creation to first response)
+  const responseTimes = tickets
+    .filter(t => t.closedTime && t.createdTime)
+    .map(t => (new Date(t.closedTime) - new Date(t.createdTime)) / 3600000)
+    .filter(h => h > 0 && h < 720);
+  const avgResponse = responseTimes.length > 0
+    ? (responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length).toFixed(1)
+    : '--';
+
+  document.getElementById('kpiOpen').textContent = open.length;
+  document.getElementById('kpiUnresponded').textContent = unresponded.length;
+  document.getElementById('kpiAvgResponse').textContent = avgResponse;
+  document.getElementById('kpiClosed7d').textContent = closed7d.length;
+  document.getElementById('kpiTotal').textContent = tickets.length;
+}
+
+// ── Channel breakdown ──
+function renderChannelChart(tickets) {
+  const channels = {};
+  tickets.forEach(t => {
+    const ch = normalizeChannel(t.channel);
+    channels[ch] = (channels[ch] || 0) + 1;
+  });
+
+  const sorted = Object.entries(channels).sort((a, b) => b[1] - a[1]);
+  const max = sorted.length > 0 ? sorted[0][1] : 1;
+  const colorMap = { 'Email': 'var(--channel-email)', 'WhatsApp': 'var(--channel-whatsapp)', 'Phone': 'var(--channel-phone)' };
+
+  document.getElementById('channelChart').innerHTML = '<div class="channel-bars">' +
+    sorted.map(([name, count]) => `
+      <div class="channel-row">
+        <span class="dot" style="background:${colorMap[name] || 'var(--channel-other)'}"></span>
+        <span class="name">${name}</span>
+        <span class="bar-wrap">
+          <div class="bar-fill" style="width:${(count/max*100).toFixed(1)}%;background:${colorMap[name] || 'var(--channel-other)'}"></div>
+        </span>
+        <span class="count">${count}</span>
+      </div>
+    `).join('') +
+    '</div>';
+}
+
+// ── Volume chart (last 14 days) ──
+function renderVolumeChart(tickets) {
+  const days = {};
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    days[key] = 0;
+  }
+  tickets.forEach(t => {
+    const key = t.createdTime?.slice(0, 10);
+    if (key in days) days[key]++;
+  });
+
+  const entries = Object.entries(days);
+  const max = Math.max(...entries.map(e => e[1]), 1);
+
+  document.getElementById('volumeChart').innerHTML = entries.map(([date, count]) => {
+    const d = new Date(date);
+    const label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const h = Math.max((count / max) * 90, count > 0 ? 4 : 0);
+    return `<div class="vol-bar-group">
+      <div class="vol-bar" style="height:${h}px"><span class="tooltip">${label}: ${count}</span></div>
+      <span class="vol-label">${d.getDate()}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Ticket list ──
+function renderTicketList(tickets) {
+  let filtered = tickets;
+
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(t => t.status === currentFilter);
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(t =>
+      (t.subject || '').toLowerCase().includes(q) ||
+      (t.contactId || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Sort: non-closed first, then by date desc
+  filtered.sort((a, b) => {
+    if (a.status === 'Closed' && b.status !== 'Closed') return 1;
+    if (a.status !== 'Closed' && b.status === 'Closed') return -1;
+    return new Date(b.createdTime) - new Date(a.createdTime);
+  });
+
+  if (filtered.length === 0) {
+    document.getElementById('ticketList').innerHTML = '<div class="empty-state">No tickets match your filter.</div>';
+    return;
+  }
+
+  document.getElementById('ticketList').innerHTML = filtered.slice(0, 50).map(t => {
+    const statusClass = t.status.toLowerCase().replace(/\s+/g, '-');
+    const channel = normalizeChannel(t.channel);
+    const channelColor = { 'Email': 'var(--channel-email)', 'WhatsApp': 'var(--channel-whatsapp)', 'Phone': 'var(--channel-phone)' }[channel] || 'var(--channel-other)';
+    const timeAgo = getTimeAgo(t.createdTime);
+
+    return `<a class="ticket-item" href="${t.webUrl || '#'}" target="_blank" rel="noopener">
+      <div>
+        <div class="ticket-subject">${escapeHtml(t.subject || 'No Subject')}</div>
+        <div class="ticket-contact">#${t.id?.slice(-6) || '---'} · ${t.contactId ? 'Contact ' + t.contactId.slice(-4) : 'Unknown'}</div>
+      </div>
+      <span class="status-pill ${statusClass}">${t.status}</span>
+      <span class="channel-tag"><span class="dot" style="background:${channelColor}"></span>${channel}</span>
+      <span class="ticket-time">${timeAgo}</span>
+    </a>`;
+  }).join('');
+}
+
+function filterTickets(status, btn) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderTicketList(allTickets);
+}
+
+function searchTickets(query) {
+  searchQuery = query;
+  renderTicketList(allTickets);
+}
+
+// ── Customers ──
+function renderCustomers(tickets) {
+  const customers = {};
+  tickets.forEach(t => {
+    const cid = t.contactId || 'unknown';
+    if (!customers[cid]) {
+      customers[cid] = { id: cid, tickets: [], open: 0, closed: 0 };
+    }
+    customers[cid].tickets.push(t);
+    if (t.status === 'Closed') customers[cid].closed++;
+    else customers[cid].open++;
+  });
+
+  const sorted = Object.values(customers).sort((a, b) => b.open - a.open || b.tickets.length - a.tickets.length);
+
+  document.getElementById('customerGrid').innerHTML = sorted.slice(0, 30).map(c => `
+    <div class="customer-card">
+      <div class="customer-name">Contact ...${c.id.slice(-6)}</div>
+      <div class="customer-email">${c.tickets[0]?.email || 'ID: ' + c.id}</div>
+      <div class="customer-stats">
+        <span><strong>${c.tickets.length}</strong> total</span>
+        <span><strong style="color:var(--warning)">${c.open}</strong> open</span>
+        <span><strong style="color:var(--good)">${c.closed}</strong> closed</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Agents ──
+function renderAgents(tickets) {
+  const agents = {};
+  tickets.forEach(t => {
+    const aid = t.assigneeId || 'Unassigned';
+    if (!agents[aid]) {
+      agents[aid] = { id: aid, total: 0, resolved: 0, open: 0, resolveTimes: [] };
+    }
+    agents[aid].total++;
+    if (t.status === 'Closed') {
+      agents[aid].resolved++;
+      if (t.closedTime && t.createdTime) {
+        const hrs = (new Date(t.closedTime) - new Date(t.createdTime)) / 3600000;
+        if (hrs > 0 && hrs < 720) agents[aid].resolveTimes.push(hrs);
+      }
+    } else {
+      agents[aid].open++;
+    }
+  });
+
+  const sorted = Object.values(agents).sort((a, b) => b.total - a.total);
+  const maxTotal = sorted.length > 0 ? sorted[0].total : 1;
+
+  document.getElementById('agentTableBody').innerHTML = sorted.map(a => {
+    const avgResolve = a.resolveTimes.length > 0
+      ? (a.resolveTimes.reduce((x, y) => x + y, 0) / a.resolveTimes.length).toFixed(1) + 'h'
+      : '--';
+    const name = a.id === 'Unassigned' ? 'Unassigned' : 'Agent ...' + a.id.slice(-4);
+    const initials = a.id === 'Unassigned' ? '?' : name.slice(-2).toUpperCase();
+    const pct = (a.total / maxTotal * 100).toFixed(0);
+    const perfColor = a.resolved / Math.max(a.total, 1) > 0.7 ? 'var(--good)' : a.resolved / Math.max(a.total, 1) > 0.4 ? 'var(--warning)' : 'var(--serious)';
+
+    return `<tr>
+      <td><span class="agent-name"><span class="agent-avatar">${initials}</span>${name}</span></td>
+      <td>${a.total}</td>
+      <td>${a.resolved}</td>
+      <td>${a.open}</td>
+      <td>${avgResolve} <span class="perf-bar"><span class="perf-fill" style="width:${pct}%;background:${perfColor}"></span></span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + name));
+}
+
+// ── Helpers ──
+function normalizeChannel(ch) {
+  if (!ch) return 'Other';
+  const lower = ch.toLowerCase();
+  if (lower.includes('email') || lower.includes('mail')) return 'Email';
+  if (lower.includes('whatsapp') || lower.includes('gaadi info care') || lower.includes('instant_message') || lower === 'gaadiinfo care') return 'WhatsApp';
+  if (lower.includes('phone') || lower.includes('call')) return 'Phone';
+  return ch;
+}
+
+function getTimeAgo(dateStr) {
+  if (!dateStr) return '--';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return days + 'd ago';
+  return Math.floor(days / 30) + 'mo ago';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Sample data generator (for demo when API isn't available) ──
+function generateSampleData() {
+  const subjects = [
+    'Challan payment pending', 'E-challan not reflecting', 'Payment confirmation needed',
+    'Traffic fine query', 'Order status update', 'Refund request for challan',
+    'Challan details incorrect', 'Payment failed but amount deducted', 'Need receipt for challan payment',
+    'Multiple challans pending', 'Urgent: Court date approaching', 'Vehicle number mismatch',
+    'Hi', 'Good morning', 'Order status query', 'Need help with payment',
+    'Challan amount wrong', 'DL challan issue', 'UP challan payment', 'RJ challan query'
+  ];
+  const channels = ['Email', 'GaadiInfo Care', 'Phone', 'Email', 'GaadiInfo Care', 'Email'];
+  const statuses = ['Open', 'Open', 'Open', 'Closed', 'Closed', 'On Hold'];
+  const tickets = [];
+  for (let i = 0; i < 40; i++) {
+    const created = new Date(Date.now() - Math.random() * 20 * 86400000);
+    const isClosed = statuses[i % statuses.length] === 'Closed';
+    tickets.push({
+      id: '279815000000' + (500000 + i),
+      subject: subjects[i % subjects.length],
+      status: statuses[i % statuses.length],
+      channel: channels[i % channels.length],
+      createdTime: created.toISOString(),
+      closedTime: isClosed ? new Date(created.getTime() + Math.random() * 72 * 3600000).toISOString() : null,
+      threadCount: String(Math.floor(Math.random() * 5) + 1),
+      contactId: '279815000000' + (300000 + (i % 15)),
+      assigneeId: i % 4 === 0 ? null : '279815000000064001',
+      webUrl: '#',
+      customerResponseTime: created.toISOString()
+    });
+  }
+  return tickets;
+}
+</script>
+</body>
+</html>
