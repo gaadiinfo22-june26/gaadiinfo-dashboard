@@ -1,0 +1,36 @@
+name: Fetch Zoho Desk Tickets
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch tickets from Zoho Desk
+        env:
+          ZOHO_ORG_ID: ${{ secrets.ZOHO_ORG_ID }}
+          ZOHO_API_TOKEN: ${{ secrets.ZOHO_API_TOKEN }}
+          ZOHO_DOMAIN: ${{ secrets.ZOHO_DOMAIN }}
+        run: node scripts/fetch-tickets.js
+
+      - name: Commit and push data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/tickets.json
+          git diff --staged --quiet || git commit -m "chore: update ticket data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
