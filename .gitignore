@@ -1,3 +1,9 @@
 node_modules/
 .DS_Store
 *.log
+*.tmp
+
+# Workspace server: secrets and cached customer conversations - never commit
+.env
+.env.local
+.cache/

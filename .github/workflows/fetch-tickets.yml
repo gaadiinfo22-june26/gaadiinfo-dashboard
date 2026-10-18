@@ -9,6 +9,11 @@ on:
 permissions:
   contents: write
 
+# Never run two syncs at once: overlapping runs would race on the data commit.
+concurrency:
+  group: fetch-zoho-tickets
+  cancel-in-progress: false
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -25,6 +30,8 @@ jobs:
           ZOHO_ORG_ID: ${{ secrets.ZOHO_ORG_ID }}
           ZOHO_API_TOKEN: ${{ secrets.ZOHO_API_TOKEN }}
           ZOHO_DOMAIN: ${{ secrets.ZOHO_DOMAIN }}
+          # Optional repository variable. Unset or 0 = open tickets only (original behaviour).
+          CLOSED_LOOKBACK_DAYS: ${{ vars.CLOSED_LOOKBACK_DAYS }}
         run: node scripts/fetch-tickets.js
 
       - name: Commit and push data

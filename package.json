@@ -1,0 +1,16 @@
+{
+  "name": "gaadiinfo-dashboard",
+  "private": true,
+  "description": "GaadiInfo escalation workspace for Zoho Desk tickets",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js",
+    "zoho:token": "node scripts/zoho-refresh-token.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.135.0"
+  }
+}
